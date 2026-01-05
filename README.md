@@ -26,14 +26,14 @@ Entrypoint implementation currently included in the benchmark:
 | Benchmark     | `pinocchio`     | `solana-program` | `jiminy`      |
 | ------------- | --------------- | ---------------- | ------------- |
 | Ping          | 🟩 **14**       | 🟨 98 (+84)       | 🟩 16 (+2)    |
-| Log           | 🟩 **118**      | 🟨 202 (+84)      | 🟩 120 (+3)   |
-| Account (1)   | 🟩 **22**       | 🟥 268 (+246)     | 🟨 37 (+15)   |
-| Account (3)   | 🟩 **44**       | 🟥 546 (+502)     | 🟨 67 (+23)   |
-| Account (5)   | 🟩 **59**       | 🟥 824 (+765)     | 🟨 97 (+38)   |
-| Account (10)  | 🟩 **101**      | 🟥 1,519 (+1,418) | 🟨 172 (+71)  |
-| Account (20)  | 🟩 **177**      | 🟥 2,909 (+2,732) | 🟥 322 (+145) |
-| Account (32)  | 🟩 **269**      | 🟥 4,577 (+4,308) | 🟥 502 (+233) |
-| Account (64)  | 🟩 **512**      | 🟥 9,025 (+8,513) | 🟥 982 (+470) |
+| Log           | 🟩 **118**      | 🟨 202 (+84)      | 🟩 120 (+2)   |
+| Account (1)   | 🟩 **22**       | 🟥 268 (+246)     | 🟨 35 (+13)   |
+| Account (3)   | 🟩 **44**       | 🟥 546 (+502)     | 🟨 61 (+17)   |
+| Account (5)   | 🟩 **59**       | 🟥 824 (+765)     | 🟨 87 (+28)   |
+| Account (10)  | 🟩 **101**      | 🟥 1,519 (+1,418) | 🟨 152 (+51)  |
+| Account (20)  | 🟩 **177**      | 🟥 2,909 (+2,732) | 🟥 282 (+105) |
+| Account (32)  | 🟩 **269**      | 🟥 4,577 (+4,308) | 🟥 438 (+169) |
+| Account (64)  | 🟩 **512**      | 🟥 9,025 (+8,513) | 🟥 854 (+342) |
 
 > [!IMPORTANT]
 > Values correspond to compute units (CUs) consumed by the entrypoint. The delta in relation to the lowest consumption is shown in brackets.
@@ -41,7 +41,7 @@ Entrypoint implementation currently included in the benchmark:
 >   - 🟨 (yellow): value within 100 CUs of the best value (`value < best value + 100`)
 >   - 🟥 (red): value over 100 CUs of the best value (`value >= best value + 100`)
 >
-> Solana platform tools `v1.51` with `LTO` enabled was used in the bench tests.
+> Solana platform tools `v1.52` with `LTO` enabled was used in the bench tests.
 
 ## CPI and Binary Size
 
@@ -52,15 +52,15 @@ There are also benchmarks for CPI and binary size produced by the different entr
 
 | Benchmark (CPI)        | `pinocchio`     | `solana-program`  | `jiminy`     |
 | ---------------------- | --------------- | ----------------- | ------------ |
-| system::create_account | 🟩 **1,291**    | 🟥 2,592 (+1,301) | 🟨 1,307 (+13)  |
-| system::transfer       | 🟩 **1,287**    | 🟥 2,189 (+902)   | 🟨 1,301 (+14)  |
+| system::create_account | 🟩 **1,291**    | 🟥 2,592 (+1,301) | 🟨 1,302 (+11)  |
+| system::transfer       | 🟩 **1,287**    | 🟥 2,189 (+902)   | 🟨 1,296 (+9)  |
 
 
 ### Binary Size
 
 |                     | `pinocchio`     | `solana-program` | `jiminy`  |
 | ------------------- | --------------- | -----------------| --------- |
-| Binary size (bytes) | 5,824 (+2,144)  | 64,784 (+61,104) | **3,680** |
+| Binary size (bytes) | 5,824 (+2,144)  | 64,784 (+61,104) | **3,584** |
 
 ## Benchmark
 
@@ -132,7 +132,7 @@ pnpm install
 This will install the required packages. Then all programs can be buiit using:
 
 ```bash
-RUSTFLAGS="-C embed-bitcode=yes -C lto=fat" pnpm programs:build --tools-version v1.51
+RUSTFLAGS="-C embed-bitcode=yes -C lto=fat" pnpm programs:build --tools-version v1.52
 ```
 
 After this, you are ready to run individual benchmarks by using:
@@ -141,7 +141,7 @@ After this, you are ready to run individual benchmarks by using:
 cargo bench --bench <ENTRYPOINT_NAME>
 ```
 
-The `ENTRYPOINT_NAME` will be one of `pinocchio`, `solana_nostd_entrypoint` or `solana_program`.
+The `ENTRYPOINT_NAME` will be one of `pinocchio`, `solana_program` or `jiminy`.
 
 The results are written to `./target/benches/compute_units.md`. Each execution is described by 3 columns:
 

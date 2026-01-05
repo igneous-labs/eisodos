@@ -3,15 +3,17 @@ use crate::{
     processor::{
         process_account, process_create_account, process_log, process_ping, process_transfer,
     },
-    Accounts, ProgramResult, MAX_ACCOUNTS,
+    ProgramResult, MAX_ACCOUNTS,
 };
-use jiminy_entrypoint::entrypoint;
+use jiminy_cpi::account::AccountHandle;
+use jiminy_entrypoint::{account::Abr, entrypoint};
 
 entrypoint!(process_instruction, MAX_ACCOUNTS);
 
 #[inline(always)]
 pub fn process_instruction(
-    accounts: &mut Accounts,
+    abr: &mut Abr,
+    accounts: &[AccountHandle],
     instruction_data: &[u8],
     _program_id: &[u8; 32],
 ) -> ProgramResult {
@@ -21,7 +23,7 @@ pub fn process_instruction(
         Instruction::Ping => process_ping(),
         Instruction::Log => process_log(),
         Instruction::Account { expected } => process_account(accounts, expected),
-        Instruction::CreateAccount => process_create_account(accounts),
-        Instruction::Transfer => process_transfer(accounts),
+        Instruction::CreateAccount => process_create_account(abr, accounts),
+        Instruction::Transfer => process_transfer(abr, accounts),
     }
 }

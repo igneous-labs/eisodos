@@ -1,9 +1,14 @@
-use crate::{Accounts, Cpi, ProgramResult};
-use jiminy_entrypoint::program_error::{BuiltInProgramError, ProgramError};
+use crate::{Cpi, ProgramResult};
+use jiminy_cpi::{
+    account::{Abr, AccountHandle},
+    program_error::{INVALID_ARGUMENT, NOT_ENOUGH_ACCOUNT_KEYS},
+};
 use jiminy_log::sol_log;
-use jiminy_system_prog_interface::{
-    create_account_ix, transfer_ix, CreateAccountIxAccounts, CreateAccountIxData,
-    TransferIxAccounts, TransferIxData,
+use sanctum_system_jiminy::sanctum_system_core::instructions::{
+    create_account::{
+        CreateAccountIxAccs, CreateAccountIxAccsDestr, CreateAccountIxArgs, CreateAccountIxData,
+    },
+    transfer::{TransferIxAccs, TransferIxAccsDestr, TransferIxData},
 };
 
 #[inline(always)]
@@ -19,54 +24,49 @@ pub fn process_log() -> ProgramResult {
 }
 
 #[inline(always)]
-pub fn process_account(accounts: &Accounts, expected: u64) -> ProgramResult {
+pub fn process_account(accounts: &[AccountHandle], expected: u64) -> ProgramResult {
     if accounts.len() == expected as usize {
         Ok(())
     } else {
-        Err(ProgramError::from_builtin(
-            BuiltInProgramError::InvalidArgument,
-        ))
+        Err(INVALID_ARGUMENT.into())
     }
 }
 
 #[inline(always)]
-pub fn process_create_account(accounts: &mut Accounts) -> ProgramResult {
-    let [funding, new, sys_prog] = accounts.as_slice() else {
-        return Err(ProgramError::from_builtin(
-            BuiltInProgramError::NotEnoughAccountKeys,
-        ));
+pub fn process_create_account(abr: &mut Abr, accounts: &[AccountHandle]) -> ProgramResult {
+    let [funding, new, _remaining @ ..] = accounts else {
+        return Err(NOT_ENOUGH_ACCOUNT_KEYS.into());
     };
-    let [funding, new, sys_prog] = [funding, new, sys_prog].map(|h| *h);
-    Cpi::new().invoke_signed(
-        accounts,
-        create_account_ix(
-            sys_prog,
-            CreateAccountIxAccounts::memset(sys_prog)
-                .with_funding(funding)
-                .with_new(new),
-            &CreateAccountIxData::new(500_000_000, 10, &crate::ID),
-        ),
-        &[],
+    Cpi::new().invoke_fwd(
+        abr,
+        &sanctum_system_jiminy::sanctum_system_core::ID,
+        CreateAccountIxData::new(&CreateAccountIxArgs {
+            lamports: 500_000_000,
+            space: 10,
+            owner: &crate::ID,
+        })
+        .as_buf(),
+        CreateAccountIxAccs::from_destr(CreateAccountIxAccsDestr {
+            funding: *funding,
+            new: *new,
+        })
+        .0,
     )
 }
 
 #[inline(always)]
-pub fn process_transfer(accounts: &mut Accounts) -> ProgramResult {
-    let [from, to, sys_prog] = accounts.as_slice() else {
-        return Err(ProgramError::from_builtin(
-            BuiltInProgramError::NotEnoughAccountKeys,
-        ));
+pub fn process_transfer(abr: &mut Abr, accounts: &[AccountHandle]) -> ProgramResult {
+    let [from, to, _remaining @ ..] = accounts else {
+        return Err(NOT_ENOUGH_ACCOUNT_KEYS.into());
     };
-    let [from, to, sys_prog] = [from, to, sys_prog].map(|h| *h);
-    Cpi::new().invoke_signed(
-        accounts,
-        transfer_ix(
-            sys_prog,
-            TransferIxAccounts::memset(sys_prog)
-                .with_from(from)
-                .with_to(to),
-            &TransferIxData::new(1_000_000_000),
-        ),
-        &[],
+    Cpi::new().invoke_fwd(
+        abr,
+        &sanctum_system_jiminy::sanctum_system_core::ID,
+        TransferIxData::new(1_000_000_000).as_buf(),
+        TransferIxAccs::from_destr(TransferIxAccsDestr {
+            from: *from,
+            to: *to,
+        })
+        .0,
     )
 }

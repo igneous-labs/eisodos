@@ -22,4 +22,4 @@ jiminy-cpi = { git = "https://github.com/igneous-labs/jiminy", branch = "master"
 jiminy-entrypoint = { git = "https://github.com/igneous-labs/jiminy", branch = "master" }
 jiminy-log = { git = "https://github.com/igneous-labs/jiminy", branch = "master" }
 jiminy-syscall = { git = "https://github.com/igneous-labs/jiminy", branch = "master" }
-jiminy-system-prog-interface = { git = "https://github.com/igneous-labs/jiminy", branch = "master" }
+sanctum-system-jiminy = { git = "https://github.com/igneous-labs/sanctum-system-sdk", branch = "master" }
